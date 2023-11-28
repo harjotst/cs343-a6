@@ -1,0 +1,110 @@
+A6 tips:
+	- Worker calls in and passes the result through the arguments (reverse of intuitive)
+	- sees there is new work so it returns the new work and starts running
+	- Don't need to be double calling - combine into one call
+	- If there is no work - postpone the rendevous and when the server wakes up the client the rendevous will complete
+	- Administrators never have to talk to each other - they rely on couriers (if multiple messages put it in the buffer for when the courier comes back)
+	- Make sure busy waiting doesn’t occur
+	- 4 administrations (servers) on assignment - put as little code in members as possible
+
+Client side:
+	- Turn the arrows into bounded buffers
+
+
+
+2023-11-27
+
+A6
+	- Setting up a WATCola truck on campus
+	- Read in file with constants (no error checking needed) - ignore comments denoted with # and blank lines
+	- Use processConfigFile routine to process the config file into a ConfigParams struct
+Student
+	- Periodically buy soda from a vending machine
+	- All students have id in range [0, NumStudents)
+	- Process:
+		1. Selects num bottles to purchase - range [1, MaxPurchases]
+		2. Selects favorite flavor [0, 3]
+		3. Creates a WAT card from wat card office with balance of $5
+		4. Creates a gift card from Groupoff with value of SodaCost
+		5. Yield a random num of times between [1, 10]
+		6. May need to wait for the money to be transferedto wat card or girft card
+		7. Once any money is available use first the giftcard (only one usage so reset after)
+			§ If the sutents WATCard has been lost during WATCardOffice::Courier, you get WATCardOffice::Lost exception when accessing the value
+			§ If Lost => student needs to create a new WATCard with $5 and reattempt to purchase the soda without yielding [note this can occur repeatedly]
+		8. Once ready to purchase, the student calls a vending machine to begin the transfer - it will debit the WATcard and deliver the bottle of soda
+		9. Then the student drinks it and attempts another purchase
+	Some unique purchase cases:
+		1. if the machine delivers a free bottle of soda - there is a 50% chance the studenet watches an ad associated with it by yielding 4 times - while drinking the free soda, then attempt another purchase
+		2. If the vending machine indicates insufficent funds, the student must transfer soda cost + $5 to their WATCard via the WATCard office
+		3. If  the machine is out of the students favorite flavor - the student must obtain a new machine from the name server and attempt another purchase [they can busy wait until their specific soda appears from the bottling plant]
+		Watch out for case where student buys one soda w a gift card
+		
+WATCard
+	- Manages the money associated w the WATCard
+	- Create w  $0 balance
+	- Courier calls deposit to transfer funds
+	- The vending machine calls withdraw when the soda is purchased
+	- Student or vending machine calls getBalence
+	- Have FWATCard to hold a future pointer to students WATCard to synch access between student and courier
+	- The future pointer, interacted with by the student, the student needs to call _Select on the WatCard?? Waiting for a 
+
+WATCard Office
+	- Administrator task used by a student to transfer funds from their bank account to their WATCard to buy soda
+	- Initially the office creates a fixed sized courier pool with numCouriers courier tasks that will communicate with the bank
+	- **no extra couriers can be created after the WATCard office begins
+	- When a student creates a WATCard  with  certain balance, a future WATCard is returned w funds obtained from the bank - parent, request is sent by a courier - the courier calls RequestWork, then blocks until a job request is ready, then revies the next job request as the result of the call
+	- As soon as the request is satisfied (ie. The money is obtained from the bank),the courier updates the students WAT card
+	- This is where there is a chance that the courier loses the students WAT card (1 in 6 prng(6) == 0) -> then they throw WATCadOffice::Lost [ insert it into the future ?? - then delete the WATCard]
+		○ Put an exception into the future
+Bank
+	- It's a monitor that behaves like a server
+	- Manages the student account info for all students
+	- Each student initially has $0
+	- Parents call deposit to endow gifts to specific students
+	- The courier calls withdraw to transfer money  & waits until enough money has been deposited
+Parent
+	- Periodically gives the students random money [$1, $3] to a random student in range [0, numStudents]
+	- Before each gift is transferred the parent yilds parentalDelay times
+	- Note: Since it must not block on this call, it is necessary to use a terminating _Else on the accept statement. Hence, the parent is performing a yielding busy-wait on calls to its destructor.
+Groupoff
+	- First accepts a call from ALL STUDENTS to obtain a future gift card
+	-  After which groupoff periodically creates and puts a real WATCard with value SodaCost 
+	- Before the future gift-card is assigned a real WATCard, it yields groupOffDelay times
+	- Lops until all future gift-cardis assigned a real WATCard or a call to its destructor occurs
+	- Note: since it must not block on the destructor call, it is necessary to use a terminating _Else on the accept statement. Note, this use of _Else is not busy waiting because there are a finite number of students.
+Vending machine
+	- A new vending machine is empty and begins by registering with the name server
+	- First check if the student has sufficient funds
+	- If yes then debit the students WATCard accordingly
+	- Otherwise, if there are not sufficient funds - raise Funds or Stock respectively
+	- If the purchase is available, there is a 1/4 chance it is free - then throw Free exception
+	- Periodically, the truck comes to restock
+		1. Truck calls inventory to return pointer to an array containing amount of each soda the machine has
+		2. Use this info to fully restock each soda up to MaxStockPerFlavor [it might not have enough, even 0, so just transfer what it has]
+		3. Then call restocked to signal the operation is complete
+	- NOTE: the machine cannot accept purchase calls during restocking
+	- The cost member returns the cost of the soda  for that machine
+NameServer
+	- Server task used to manage the vending-machine names
+	- The name server is passed the number of vending machine, NumVendingMachines and NumStudents
+	- Starts by distributing the students across the vending machines using round robin fashion, like dealing
+	- The vending machines call Vmregister to register themselves so students can subsequently locate them
+	- The student calls getMachine to find a vending machine and the name server must cycle through the vending machines separetly for each student starting from the initial position via modulo
+	- The truck uses getMachineList to ensure it can deliver soda to each vending machine
+	- ALL vending machines must be registered before accepting calls to other memebers
+BottlingPlant
+	- Periodically produces new quantities of soda [0, MaxShipped] per flavor
+	1. Creates a truck
+	2. Performs a production run (simulate by yielding TimeBetweenShipments num times, then call getShipment - could return Shutdown exception if the bottling plant is closed - use concurrent exceptions to raise this on the right task)
+	3. Waits for truck to pick up the production run
+	4. Wait until the truck has picked up this run to start the next production run
+Truck
+	- Move the soda from bottling plant to the vending machines
+	- Before each shipment, the truck yields between 1 and 10 times
+	- Then calls BottlingPlant::getShipment to obtain an new shipment
+	- Any soda on the truck is thrown away if past its due date
+	- If the plant is closing the truck terminates
+	- The restocking occurs in cyclical order, and has no guarantee that all machines will be restocked
+	- Also a 1/100 chance a flat tire occurs => yield 10 times
+Printer
+	- Use to generate a table of output for all tasks
