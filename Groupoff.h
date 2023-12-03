@@ -1,5 +1,7 @@
-#include <uSemaphore.h>
+#include <uCobegin.h>
 #include <algorithm>
+#include "watcard.h"
+#include "Printer.h"
 
 using namespace std;
 
@@ -8,56 +10,76 @@ _Task Groupoff {
 	unsigned int numStudents;
 	unsigned int sodaCost;
 	unsigned int groupoffDelay;
-	WATCard* WATCards;
-	unsigned int add_WATCard_index;
-	uLock lock;
+	WATCard::FWATCard * FWATCards;
+	unsigned int add_FWATCard_idx;
+	uOwnerLock lock;
+	uOwnerLock own_lock;
+	uCondLock start_gc_dist;
 
 
 	void main() {
 		// wait until all student request a gift-card to start distributing them
-		suspend();
-		// then shuffle this array to ensure the gift card distribution is random
-		random_shuffle(begin(WATCards), end(WATCards));
+		//suspend();
+		cout << "try to acquire owner lock" << endl;
 
-		for(int i = 0; i < numStudent; i++) {
+		own_lock.acquire();
+		cout << "acquired lock from main" << endl;
+		start_gc_dist.wait(own_lock);
+
+
+		own_lock.release();
+
+		// then shuffle this array to ensure the gift card distribution is random
+		random_shuffle(&(FWATCards[0]), &(FWATCards[numStudents]));
+
+		for(int i = 0; i < numStudents; i++) {
 			// attempt the except of the Groupoff destructor without the acceptor blocking
 			// this causes groupoff to perform a yielding busy-wait on calls to its destructor
-			_Accept(Groupoff) {
+			_Accept(~Groupoff) {
 				break;
 
 			// if no call to destructor continue distributing giftcards
 			// note: _Else is not busy waiting because there are a finite number of students.
 			} _Else {}
 
-			yield(groupOffDelay);
+			yield(groupoffDelay);
 		
 			// give the ith WATCard in the array a giftcard by
-			WATCards[i]->FWATCard = WATCards[i];
+			WATCard* wc = new WATCard();
+			wc->deposit(sodaCost);
+			FWATCards[i].delivery(wc);
 		}
 	}
 
   public:
-	Groupoff( Printer & prt, unsigned int numStudents, unsigned int sodaCost, unsigned int groupoffDelay ) : prt(prt), numStudents(numStudents), sodaCost(sodaCost), groupoffDelay(groupoffDelay) {
-		WATCards = new WATCard[numStudents];
-		add_WATCard_index = 0;
+	Groupoff( Printer & prt, unsigned int numStudents, unsigned int sodaCost, unsigned int groupoffDelay ) : prt(&prt), numStudents(numStudents), sodaCost(sodaCost), groupoffDelay(groupoffDelay) {
+		FWATCards = new WATCard::FWATCard[numStudents];
+		add_FWATCard_idx = 0;
 	}
 	
 	// called by all student
 	WATCard::FWATCard giftCard() {
+		cout << "called giftcard from function" << endl;
 		// no barging prevention, but doesn't matter here just need to set up an array of WATCards in arbitrary order
-		lock.acquire();
-		unsigned int idx = add_WATCard_idx;
-		add_WATCard_index_count += 1;
+		cout << "try to acquire own lock" << endl;
+		own_lock.acquire();		
+		cout << "acquired lock" << endl;
+		unsigned int idx = add_FWATCard_idx;
+		add_FWATCard_idx += 1;
 		lock.release();
 
-		WATCard* wc = new WATCard();
-		wc->deposit(sodaCost);
-		WATCards[idx] = wc;
+		WATCard::FWATCard fwc; 
+		FWATCards[idx] = fwc;
 		
 		if(idx == numStudents) {
-			resume();
+			//resume();// maybe replace with resume?
+			own_lock.acquire();
+			cout << "acquired lock from giftcard to signal" << endl;
+			start_gc_dist.signal();
+			own_lock.release();
 		}
 
-		return wc->FWATCard;
+		cout << "return" << endl;
+		return fwc;
 	}
 };

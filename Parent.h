@@ -1,3 +1,6 @@
+#include "Printer.h"
+
+
 _Task Parent {
 	Printer * prt;
 	Bank * bank;
@@ -20,10 +23,10 @@ _Task Parent {
 			unsigned int sid = prng(0, numStudents - 1); // prng(l, u) [l,u]
 			unsigned int amount = prng(1, 3);
 
-			bank->deposit(id, amount);
+			bank->deposit(sid, amount);
 		}
 	}
 
   public:
-	Parent( Printer & prt, Bank & bank, unsigned int numStudents, unsigned int parentalDelay ) : prt(prt), bank(bank), numStudents(numStudents), parentalDelay(parentalDelay) {}
+	Parent( Printer & prt, Bank & bank, unsigned int numStudents, unsigned int parentalDelay ) : prt(&prt), bank(&bank), numStudents(numStudents), parentalDelay(parentalDelay) {}
 };

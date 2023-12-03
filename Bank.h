@@ -1,3 +1,5 @@
+#pragma once
+
 // manages all the students account info
 _Monitor Bank {
 	unsigned int *student_accounts;
@@ -5,11 +7,11 @@ _Monitor Bank {
 
   public:
 	Bank( unsigned int numStudents ) {
-		student_accounts = new int[numStudents]; // maybe use uNoCtor - apparently C++ guarentees mem is 0 initialized does uC++?
+		student_accounts = new unsigned int[numStudents]; // maybe use uNoCtor - apparently C++ guarentees mem is 0 initialized does uC++?
 		account_locks = new uCondition[numStudents];
 
 		// all students start with $0
-		for(int i = 0; i < numStudent; i++) {
+		for(int i = 0; i < numStudents; i++) {
 			student_accounts[i] = 0;
 		}
 	}
