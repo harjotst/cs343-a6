@@ -17,11 +17,15 @@ private:
 
     bool isCargoEmpty(int cargo[4]);
 
+    void restock(unsigned int vid, unsigned int *inventory, unsigned int cargo[4])
+
     void main();
 
 public:
     Truck(Printer & prt, NameServer & nameServer, BottlingPlant & plant,
           unsigned int numVendingMachines, unsigned int maxStockPerFlavour); // done
+
+    ~Truck();
 }
 
 #endif // TRUCK_H

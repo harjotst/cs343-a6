@@ -1,111 +1,99 @@
 #include "printer.h"
 
-Printer::Printer(unsigned int numStudents,
-                 unsigned int numVendingMachines,
-                 unsigned int numCouriers)
-    : numOfStudents(numStudent),
-      numOfVendingMachines(numVendingMachines),
-      numOfCouriers(numCouriers)
+Printer::Printer(unsigned int numStudents, unsigned int numVendingMachines, unsigned int numCouriers)
+    : numOfStudents(numStudent), numOfVendingMachines(numVendingMachines), numOfCouriers(numCouriers)
 {
     unsigned int buffSize = 6 + numOfStudents + numOfVendingMachines + numOfCouriers;
 
-    printerBuff = new PrinterState *[buffSize];
+    printerBuffer = new PrinterState *[buffSize];
 
     for (unsigned int idx = 0; idx < buffSize; idx += 1)
-        printerBuff[idx] = nullptr;
+        printerBuffer[idx] = nullptr;
 }
 
-Printer::PrinterState::PrinterState(Kind kind,
-                                    char state,
-                                    unsigned int value1 = 0,
-                                    unsigned int value2 = 0,
-                                    unsigned int lid = 0)
-    : kind(kind),
-      state(state),
-      value1(value1),
-      value2(value2),
-      lid(lid);
+Printer::PrinterState::PrinterState(Kind kind, char state, unsigned int value1 = 0, unsigned int value2 = 0, unsigned int lid = 0)
+    : kind(kind), state(state), value1(value1), value2(value2), lid(lid) {}
 
 void Printer::handleParentOutput(PrinterState *ps)
 {
     if (ps->state == 'S' || ps->state == 'F')
-        cout << ps->state << "       " << endl;
+        printState(ps);
     else if (ps->state == 'D')
-        cout << "D " << ps->value1 << "," << ps->value2 << "   ";
+        printStateDouble(ps);
 }
 
 void Printer::handleGroupoffOutput(PrinterState *ps)
 {
     if (ps->state == 'S' || ps->state == 'F')
-        cout << ps->state << "       " << endl;
+        printState(ps);
     else if (ps->state == 'D')
-        cout << "D " << ps->value1 << "     ";
+        printStateSingle(ps);
 }
 
 void Printer::handleWATCardOfficeOutput(PrinterState *ps)
 {
     if (ps->state == 'S' || ps->state == 'W' || ps->state == 'F')
-        cout << ps->state << "       " << endl;
+        printState(ps);
     else if (ps->state == 'C' || ps->state == 'T')
-        cout << ps->state << " " << ps->value1 << "," << ps->value2 << "   ";
+        printStateDouble(ps);
 }
 
 void Printer::handleNameServerOutput(PrinterState *ps)
 {
     if (ps->state == 'S' || ps->state == 'F')
-        cout << ps->state << "       " << endl;
+        printState(ps);
     else if (ps->state == 'R')
-        cout << "R " << ps->value1 << "     ";
+        printStateSingle(ps);
     else if (ps->state == 'N')
-        cout << "N " << ps->value1 << "," << ps->value2 << "   ";
+        printStateDouble(ps);
 }
 
 void Printer::handleTruckOutput(PrinterState *ps)
 {
     if (ps->state == 'S' || ps->state == 'W' || ps->state == 'F')
-        cout << ps->state << "       " << endl;
+        printState(ps);
     else if (ps->state == 'P')
-        cout << "P " << ps->value1 << "     ";
+        printStateSingle(ps);
     else if (ps->state == 'd' || ps->state == 'U' || ps->state == 'D')
-        cout << ps->state << " " << ps->value1 << "," << ps->value2 << "   ";
+        printStateDouble(ps);
 }
 
 void Printer::handleBottlingPlantOutput(PrinterState *ps)
 {
     if (ps->state == 'S' || ps->state == 'P' || ps->state == 'F')
-        cout << ps->state << "       " << endl;
+        printState(ps);
     else if (ps->state == 'G')
-        cout << "G " << ps->value1 << "     ";
+        printStateSingle(ps);
 }
 
 void Printer::handleStudentOutput(PrinterState *ps)
 {
     if (ps->state == 'X' || ps->state == 'L' || ps->state == 'F')
-        cout << ps->state << "       " << endl;
+        printState(ps);
     else if (ps->state == 'V')
-        cout << "V " << ps->value1 << "     ";
+        printStateSingle(ps);
     else if (ps->state == 'S' || ps->state == 'G' || ps->state == 'B' || ps->state == 'a' || ps->state == 'A')
-        cout << ps->state << " " << ps->value1 << "," << ps->value2 << "   ";
+        printStateDouble(ps);
 }
 
 void Printer::handleVendingOutput(PrinterState *ps)
 {
     if (ps->state == 'r' || ps->state == 'B' || ps->state == 'A' || ps->state == 'F')
-        cout << ps->state << "       " << endl;
+        printState(ps);
     else if (ps->state == 'S')
-        cout << "S " << ps->value1 << "     ";
+        printStateSingle(ps);
     else if (ps->state == 'B')
-        cout << "B " << ps->value1 << "," << ps->value2 << "   ";
+        printStateDouble(ps);
 }
 
 void Printer::handleCourierOutput(PrinterState *ps)
 {
     if (ps->state == 'S' || ps->state == 'F')
-        cout << ps->state << "       " << endl;
+        printState(ps);
     else if (ps->state == 'L')
-        cout << "L " << ps->value1 << "     ";
+        printStateSingle(ps);
     else if (ps->state == 't' || ps->state == 'T')
-        cout << "B " << ps->value1 << "," << ps->value2 << "   ";
+        printStateDouble(ps);
 }
 
 void Printer::handleOutput(PrinterState *ps)
@@ -132,57 +120,86 @@ void Printer::handleOutput(PrinterState *ps)
         handleCourierOutput(ps);
 }
 
+unsigned int Printer::getOffset(Kind kind, unsigned int lid)
+{
+    return kind == Student   ? Student + lid
+           : kind == Vending ? Student + numOfStudents + lid
+           : kind == Courier ? Student + numOfStudents + numOfVendingMachines + lid
+                             : kind;
+}
+
 void Printer::flush(Kind kind, unsigned int lid)
 {
-    if (printerBuff[kind + lid] == nullptr)
+    if (printerBuffer[getOffset(kind, lid)] == nullptr)
         return;
 
     unsigned int buffSize = 6 + numOfStudents + numOfVendingMachines + numOfCouriers;
 
     for (unsigned int idx = 0; idx < buffSize; idx += 1)
-        handleOutput(printerBuff[idx]);
+        handleOutput(printerBuffer[idx]);
 
     cout << endl;
+}
+
+void Printer::printState(PrinterState *ps)
+{
+    cout << ps->state << "       ";
+}
+
+void Printer::printStateSingle(PrinterState *ps)
+{
+    unsigned int digits = ps->value1 > 0 ? floor(log10(ps->value1) + 1) : 1;
+
+    cout << ps->state << " " << ps->value1 << string(6 - digits, ' ');
+}
+
+void Printer::printStateDouble(PrinterState *ps)
+{
+    unsigned int digits1 = ps->value1 > 0 ? floor(log10(ps->value1) + 1) : 1;
+
+    unsigned int digits2 = ps->value2 > 0 ? floor(log10(ps->value2) + 1) : 1;
+
+    cout << ps->state << " " << ps->value1 << "," << ps->value2 << string(5 - digits1 - digits2, ' ');
 }
 
 void Printer::print(Kind kind, char state)
 {
     flush(kind);
 
-    printerBuff = new PrinterState(kind, state);
+    printerBuffer[getOffset(kind)] = new PrinterState(kind, state);
 }
 
 void Printer::print(Kind kind, char state, unsigned int value1)
 {
     flush(kind);
 
-    printerBuff = new PrinterState(kind, state, value1);
+    printerBuffer[getOffset(kind)] = new PrinterState(kind, state, value1);
 }
 
 void Printer::print(Kind kind, char state, unsigned int value1, unsigned int value2)
 {
     flush(kind);
 
-    printerBuff = new PrinterState(kind, state, value1, value2);
+    printerBuffer[getOffset(kind)] = new PrinterState(kind, state, value1, value2);
 }
 
 void Printer::print(Kind kind, unsigned int lid, char state)
 {
     flush(kind, lid);
 
-    printerBuff = new PrinterState(kind, state, 0, 0, lid);
+    printerBuffer[getOffset(kind, lid)] = new PrinterState(kind, state, 0, 0, lid);
 }
 
 void Printer::print(Kind kind, unsigned int lid, char state, unsigned int value1)
 {
     flush(kind, lid);
 
-    printerBuff = new PrinterState(kind, state, value1, 0, lid);
+    printerBuffer[getOffset(kind, lid)] = new PrinterState(kind, state, value1, 0, lid);
 }
 
 void Printer::print(Kind kind, unsigned int lid, char state, unsigned int value1, unsigned int value2)
 {
     flush(kind, lid);
 
-    printerBuff = new PrinterState(kind, state, value1, value2, lid);
+    printerBuffer[getOffset(kind, lid)] = new PrinterState(kind, state, value1, value2, lid);
 }

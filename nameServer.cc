@@ -8,35 +8,43 @@ NameServer::NameServer(Printer &prt, unsigned int numVendingMachines,
 
     nextAvailVMSpot = 0;
 
-    nextVendingMachineForStudent = new (unsigned int)[numOfStudents];
+    nextVendingMachineForStudent = new unsigned int[numOfStudents];
 
     for (unsigned int idx = 0; idx < numOfStudents; idx += 1)
         nextVendingMachineForStudent[idx] = idx % numOfVendingMachines;
 }
 
-NameServer::~NameServer() {}
+NameServer::~NameServer()
+{
+    printer.print(NameServer, 'F');
+}
 
 void NameServer::main()
 {
+    printer.print(NameServer, 'S');
+
     for (; nextAvailVMSpot < numOfVendingMachines; nextAvailVMSpot += 1)
         Accept(VMregister);
 
     for (;;)
     {
         _Accept(~NameServer) break;
-        or _Accept(getMachine){} 
-        or _Accept(getMachineList) {}
+        or _Accept(getMachine){} or _Accept(getMachineList) {}
     }
 }
 
 void NameServer::VMregister(VendingMachine *vendingmachine)
 {
+    printer.print(NameServer, 'R', vendingMachine->getId());
+
     vendingMachines[nextAvailVMSpot] = vendingmachine;
 }
 
 VendingMachine *NameServer::getMachine(unsigned int id)
 {
-    VendingMachine vendingMachine = nextVendingMachineForStudent[id];
+    VendingMachine *vendingMachine = vendingMachines[nextVendingMachineForStudent[id]];
+
+    printer.print(NameServer, 'N', id, vendingMachine->getId());
 
     nextVendingMachineForStudent[id] = (nextVendingMachineForStudent[id] + 1) % numOfVendingMachines;
 
