@@ -1,13 +1,7 @@
 #include "vendingMachine.h"
 
-VendingMachine::VendingMachine(Printer &prt,
-                               NameServer &nameServer,
-                               unsigned int id,
-                               unsigned int sodaCost)
-    : printer(prt),
-      nameServer(nameServer),
-      id(id),
-      sodaCost(sodaCost)
+VendingMachine::VendingMachine(Printer &prt, NameServer &nameServer, unsigned int id, unsigned int sodaCost)
+    : printer(prt), nameServer(nameServer), id(id), sodaCost(sodaCost)
 {
     inv = new unsigned int[BottlingPlant::NUM_OF_FLAVOURS];
 
@@ -17,8 +11,15 @@ VendingMachine::VendingMachine(Printer &prt,
     nameServer.VMregister(this);
 }
 
+VendingMachine::~VendingMachine()
+{
+    printer.print(Printer::Vending, id, 'F');
+}
+
 void VendingMachine::main()
 {
+    printer.print(Printer::Vending, id, 'S');
+
     bool restocking = false;
 
     for (;;)
@@ -31,27 +32,43 @@ void VendingMachine::main()
 
 void VendingMachine::buy(BottlingPlant::Flavours flavour, WATCard &card)
 {
-    if (card.getBalance() < sodaCost)
-        _Throw Funds();
+    _Select(card.FWATCard)
+    {
+        if (card.FWATCard->getBalance() < sodaCost)
+            _Throw Funds();
 
-    if (inv[flavour] == 0)
-        _Throw Stock();
+        if (inv[flavour] == 0)
+            _Throw Stock();
 
-    if (prng(5) == 0)
-        _Throw Free();
+        if (prng(5) == 0)
+        {
+            printer.print(Printer::Vending, id, 'A');
 
-    card.withdraw(sodaCost);
+            _Throw Free();
+        }
+
+        card.FWATCard->withdraw(sodaCost);
+
+        printer.print(Printer::Vending, id, 'B', flavour);
+    }
 }
 
 unsigned int *VendingMachine::inventory()
 {
+    printer.print(Printer::Vending, id, 'r');
+
     return inv;
 }
 
-voidVendingMachine::restocked() {}
+void VendingMachine::restocked()
+{
+    printer.print(Printer::Vending, id, 'R');
+}
 
 unsigned int VendingMachine::cost()
 {
+    printer.print(Printer::Vending, id, 'R');
+
     return sodaCost;
 }
 

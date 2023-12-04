@@ -35,6 +35,8 @@ public:
 
     VendingMachine(Printer &prt, NameServer &nameServer, unsigned int id, unsigned int sodaCost); // done
 
+    ~VendingMachine();
+
     /* Attempts to buy bottle of specified flavour and withdraws cost from provided card */
     void buy(BottlingPlant::Flavours flavour, WATCard & card); // done
 

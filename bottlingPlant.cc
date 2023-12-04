@@ -9,10 +9,15 @@ BottlingPlant::BottlingPlant(Printer &prt, NameServer &nameServer, unsigned int 
       truck(prt, nameServer, *self, numVendingMachines, maxStockPerFlavour),
       isShuttingDown(false) {}
 
-BottlingPlant::~BottlingPlant() {}
+BottlingPlant::~BottlingPlant()
+{
+    printer.print(Printer::BottlingPlant, 'F');
+}
 
 void BottlingPlant::main()
 {
+    printer.print(Printer::BottlingPlant, 'S');
+
     for (;;)
     {
         yield(timeBetweenShipments);
@@ -29,6 +34,9 @@ void BottlingPlant::main()
         {
             for (unsigned int idx = 0; idx < NUM_OF_FLAVOURS; idx += 1)
                 productionRun[idx] = prng(maxShippedPerFlavour);
+
+            printer.print(Printer::BottlingPlant, 'G',
+                          productionRun[0] + productionRun[1] + productionRun[2] + productionRun[3]);
         }
     }
 }
@@ -43,5 +51,7 @@ void BottlingPlant::getShipment(unsigned int cargo[])
     {
         for (unsigned int idx = 0; idx < NUM_OF_FLAVOURS; idx += 1)
             cargo[idx] = productionRun[idx];
+
+        printer.print(Printer::BottlingPlant, 'P');
     }
 }

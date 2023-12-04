@@ -17,8 +17,6 @@ private:
 
     unsigned int *nextVendingMachineForStudent;
 
-    VendingMachine *requestedVendingMachine;
-
     void main(); // done
 
 public:

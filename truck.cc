@@ -1,23 +1,17 @@
 #include "truck.h"
 
-Truck::Truck(Printer &prt,
-             NameServer &nameServer,
-             BottlingPlant &plant,
-             unsigned int numVendingMachines,
-             unsigned int maxStockPerFlavour)
-    : printer(printer),
-      nameServer(nameServer),
-      bottlingPlant(plant),
-      numOfVendingMachines(numVendingMachines),
-      maxStockPerFlavour(maxStockPerFlavour) {}
+Truck::Truck(Printer &prt, NameServer &nameServer, BottlingPlant &plant, unsigned int numVendingMachines, unsigned int maxStockPerFlavour)
+    : printer(printer), nameServer(nameServer), bottlingPlant(plant), numOfVendingMachines(numVendingMachines), maxStockPerFlavour(maxStockPerFlavour) {}
 
 bool Truck::isCargoEmpty(int cargo[4])
 {
     return cargo[0] == 0 && cargo[1] == 0 && cargo[2] == 0 && cargo[3] == 0;
 }
 
-void Truck::restock(unsigned int *inventory, unsigned int cargo[4])
+void Truck::restock(unsigned int vid, unsigned int *inventory, unsigned int cargo[4])
 {
+    unsigned int notFilled = 0;
+
     for (unsigned int idx = 0; idx < BottlingPlant::NUM_OF_FLAVOURS; idx += 1)
     {
         unsigned int bottlesTransferred = min(maxStockPerFlavour - inventory[idx], cargo[idx]);
@@ -25,11 +19,23 @@ void Truck::restock(unsigned int *inventory, unsigned int cargo[4])
         inventory[idx] += bottlesTransferred;
 
         cargo[idx] -= bottlesTransferred;
+
+        notFilled += maxStockPerFlavour - inventory[idx];
     }
+
+    if (notFilled != 0)
+        printer.print(Printer::Vending, vid, notFilled);
+}
+
+Truck::~Truck()
+{
+    printer.print(Printer::Truck, 'F');
 }
 
 void Truck::main()
 {
+    printer.print(Printer::Truck, 'S');
+
     VendingMachine **vendingMachines = nameServer.getMachineList();
 
     int nextToRestock = 0;
@@ -44,6 +50,10 @@ void Truck::main()
 
             bottlingPlant.getShipment(cargo);
 
+            unsigned int numOfRemBottles = cargo[0] + cargo[1] + cargo[2] + cargo[3];
+
+            printer.print(Printer::Truck, 'P', numOfRemBottles);
+
             int firstRestocked = nextToRestock;
 
             for (;;)
@@ -53,7 +63,13 @@ void Truck::main()
 
                 VendingMachine *vendingMachine = vendingMachines[nextToRestock];
 
-                restock(vendingMachine->inventory(), cargo);
+                printer.print(Printer::Vending, 'd', vendingMachine->getId(), numOfRemBottles);
+
+                restock(vendingMachine->getId(), vendingMachine->inventory(), cargo);
+
+                numOfRemBottles = cargo[0] + cargo[1] + cargo[2] + cargo[3];
+
+                printer.print(Printer::Vending, 'D', vendingMachine->getId(), numOfRemBottles);
 
                 nextToRestock = (nextToRestock + 1) % numOfVendingMachines;
 
@@ -62,8 +78,14 @@ void Truck::main()
             }
 
             if (prng(100) == 0)
+            {
+                printer.print(Printer::Truck, 'W');
+
                 yield(10);
+            }
         }
     }
-    _CatchResume(Shutdown &) {}
+    _CatchResume(Shutdown &)
+    {
+    }
 }
