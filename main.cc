@@ -2,7 +2,10 @@
 #include "Groupoff.h"
 #include "Parent.h"
 #include "Bank.h"
+#include <chrono>
+#include <thread>
 
+using namespace std;
 
 int main() {
     unsigned int numStudents = 10;
@@ -17,14 +20,13 @@ int main() {
     WATCardOffice* office = new WATCardOffice(printer, bank, numCouriers);
     //Groupoff* groupoff = new Groupoff(printer, numStudents, sodaCost, groupoffDelay);
 
-
+    WATCard::FWATCard fwc;
     for(int id = 0; id < numStudents; id++) {
-        cout << "call giftcard from main" << endl; // no gift card signals tilI run all at same time
+        //cout << "call giftcard from main" << endl; // no gift card signals tilI run all at same time
         //WATCard::FWATCard fgc = groupoff->giftCard();
-
         // Creates a WAT card from WATCard office with balance of $5
         cout << "create fwc" << endl;
-		WATCard::FWATCard fwc = office->create(id, 5);
+		fwc = office->create(id, 5);
 		cout << "returned fwat card" << endl;
         WATCard *card;
         bool lost = false;
@@ -48,13 +50,15 @@ int main() {
             lost = true;
             fwc = office->create(id, 5);
             card = fwc();
-            delete card;            
+            //delete card;            
 
         }
 		//} while(lost)
 
-        cout << "student " << id << "WATCard created" << endl;
+        cout << "student " << id << " WATCard created" << endl;
 
-        delete card;
+        //delete card;
     }
+
+    delete office;
 }
