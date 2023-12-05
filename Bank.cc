@@ -2,10 +2,10 @@
 
 Bank::Bank(unsigned int numStudents)
 {
-    student_accounts = new unsigned int[numStudents]; // maybe use uNoCtor - apparently C++ guarentees mem is 0 initialized does uC++?
+    student_accounts = new unsigned int[numStudents];
+
     account_locks = new uCondition[numStudents];
 
-    // all students start with $0
     for (unsigned int i = 0; i < numStudents; i++)
     {
         student_accounts[i] = 0;

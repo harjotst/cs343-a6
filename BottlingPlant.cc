@@ -63,7 +63,9 @@ void BottlingPlant::getShipment(unsigned int cargo[])
 
     if (isShuttingDown)
     {
-        _Resume Shutdown() _At truck;
+        uRendezvousAcceptor();
+
+        _Throw Shutdown();
     }
     else
     {

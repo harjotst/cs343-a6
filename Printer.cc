@@ -38,6 +38,23 @@ Printer::Printer(unsigned int numStudents, unsigned int numVendingMachines, unsi
 
 Printer::~Printer()
 {
+    unsigned int buffSize = 6 + numOfStudents + numOfVendingMachines + numOfCouriers;
+
+    for (unsigned int idx = 0; idx < buffSize; idx += 1)
+    {
+        // cout << "INSIDE OF FLUSH METHOD" << endl;
+
+        handleOutput(printerBuffer[idx]);
+
+        delete printerBuffer[idx];
+
+        printerBuffer[idx] = nullptr;
+    }
+
+    delete[] printerBuffer;
+
+    cout << endl;
+
     cout << string(23, '*') << endl;
 }
 

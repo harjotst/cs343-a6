@@ -4,6 +4,14 @@
 
 #include <uPRNG.h>
 
+Parent::Parent(Printer &prt, Bank &bank, unsigned int numStudents, unsigned int parentalDelay)
+    : printer(prt), bank(bank), numStudents(numStudents), parentalDelay(parentalDelay) {}
+
+Parent::~Parent()
+{
+    printer.print(Printer::Parent, 'F');
+}
+
 void Parent::main()
 {
     // cout << "par 9" << endl;
@@ -33,10 +41,4 @@ void Parent::main()
             bank.deposit(sid, amount);
         }
     }
-
-    // cout << "par 41" << endl;
-    printer.print(Printer::Parent, 'F');
 }
-
-Parent::Parent(Printer &prt, Bank &bank, unsigned int numStudents, unsigned int parentalDelay)
-    : printer(prt), bank(bank), numStudents(numStudents), parentalDelay(parentalDelay) {}

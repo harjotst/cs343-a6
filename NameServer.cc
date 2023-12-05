@@ -22,6 +22,10 @@ NameServer::NameServer(Printer &prt, unsigned int numVendingMachines,
 
 NameServer::~NameServer()
 {
+    delete[] vendingMachines;
+
+    delete[] nextVendingMachineForStudent;
+
     printer.print(Printer::NameServer, 'F');
 }
 
@@ -36,18 +40,9 @@ void NameServer::main()
         {
             break;
         }
-        or _Accept(VMregister)
-        {
-            // cout << "BEFORE VM REGISTER" << endl;
-        }
-        or _When(nextAvailVMSpot >= numOfVendingMachines) _Accept(getMachine)
-        {
-            // cout << "BEFORE STUDENT GET MACHINE" << endl;
-        } 
-        or _When(nextAvailVMSpot >= numOfVendingMachines) _Accept(getMachineList)
-        {
-            // cout << "BEFORE TRUCK GET MACHINE LIST" << endl;
-        }
+        or _Accept(VMregister);
+        or _When(nextAvailVMSpot >= numOfVendingMachines) _Accept(getMachine);
+        or _When(nextAvailVMSpot >= numOfVendingMachines) _Accept(getMachineList);
     }
 }
 

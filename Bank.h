@@ -3,6 +3,7 @@
 
 _Monitor Bank
 {
+private:
 	unsigned int *student_accounts;
 	
 	uCondition *account_locks;

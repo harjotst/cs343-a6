@@ -118,7 +118,7 @@ void Truck::main()
             // cout << "TRUCK IS DONE ANOTHER THINGY" << endl;
         }
     }
-    _CatchResume(BottlingPlant::Shutdown &)
+    _Catch(BottlingPlant::Shutdown &)
     {
     }
 }

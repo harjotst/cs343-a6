@@ -21,6 +21,8 @@ VendingMachine::VendingMachine(Printer &prt, NameServer &nameServer, unsigned in
 
 VendingMachine::~VendingMachine()
 {
+    delete inv;
+    
     printer.print(Printer::Vending, id, 'F');
 }
 
@@ -34,8 +36,11 @@ void VendingMachine::main()
 
     for (;;)
     {
-
-        _When(restocking) _Accept(restocked)
+        _Accept(~VendingMachine)
+        {
+            break;
+        }
+        or _When(restocking) _Accept(restocked)
         {
             restocking = false;
         }

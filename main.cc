@@ -43,32 +43,54 @@ int main(int argc, char **argv)
 
     processConfigFile(fileContent.c_str(), config);
 
-    cout << config << endl << endl;
+    cout << config << endl
+         << endl;
 
-    Printer printer(config.numStudents, config.numVendingMachines, config.numCouriers);
+    Printer *printer = new Printer(config.numStudents, config.numVendingMachines, config.numCouriers);
 
-    NameServer nameServer(printer, config.numVendingMachines, config.numStudents);
+    NameServer *nameServer = new NameServer(*printer, config.numVendingMachines, config.numStudents);
 
-    BottlingPlant bottlingPlant(printer, nameServer, config.numVendingMachines, config.maxShippedPerFlavour, config.maxStockPerFlavour, config.timeBetweenShipments);
+    BottlingPlant *bottlingPlant = new BottlingPlant(*printer, *nameServer, config.numVendingMachines,
+                                                     config.maxShippedPerFlavour, config.maxStockPerFlavour,
+                                                     config.timeBetweenShipments);
 
     Bank bank(config.numStudents);
 
-    Parent parent(printer, bank, config.numStudents, config.parentalDelay);
+    Parent *parent = new Parent(*printer, bank, config.numStudents, config.parentalDelay);
 
-    WATCardOffice office(printer, bank, config.numCouriers);
+    WATCardOffice *office = new WATCardOffice(*printer, bank, config.numCouriers);
 
-    Groupoff groupoff(printer, config.numStudents, config.sodaCost, config.groupoffDelay);
+    Groupoff *groupoff = new Groupoff(*printer, config.numStudents, config.sodaCost, config.groupoffDelay);
 
     VendingMachine **vendingMachines = new VendingMachine *[config.numVendingMachines];
 
     for (unsigned int id = 0; id < config.numVendingMachines; id += 1)
-        vendingMachines[id] = new VendingMachine(printer, nameServer, id, config.sodaCost);
+        vendingMachines[id] = new VendingMachine(*printer, *nameServer, id, config.sodaCost);
 
     Student **students = new Student *[config.numStudents];
 
     for (unsigned int id = 0; id < config.numStudents; id += 1)
-        students[id] = new Student(printer, nameServer, office, groupoff, id, config.maxPurchases);
+        students[id] = new Student(*printer, *nameServer, *office, *groupoff, id, config.maxPurchases);
 
     for (unsigned int id = 0; id < config.numStudents; id += 1)
         delete students[id];
+
+    delete[] students;
+
+    delete bottlingPlant;
+
+    for (unsigned int id = 0; id < config.numVendingMachines; id += 1)
+        delete vendingMachines[id];
+
+    delete[] vendingMachines;
+
+    delete office;
+
+    delete groupoff;
+
+    delete parent;
+
+    delete nameServer;
+
+    delete printer;
 }
