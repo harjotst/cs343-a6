@@ -50,7 +50,7 @@ void Student::main()
 
     bool skipYield = false;
 
-    for (unsigned int sodasPurchased = 0; sodasPurchased < maxPurchases;)
+    for (unsigned int sodasPurchased = 0; sodasPurchased < bottlesToPurchase;)
     {
         if (!skipYield)
             yield(prng(1, 10));
@@ -98,11 +98,11 @@ void Student::main()
                 cout << "STUDENT " << id << " AFTER BUYING WITH FWC" << endl;
 
                 printer.print(Printer::Student, id, 'B', favouriteFlavour, watCard->getBalance());
+
+                sodasPurchased += 1;
+
+                cout << "STUDENT " << id << " NUM OF SODAS PURCHASED INCREASED TO " << sodasPurchased << endl;
             }
-
-            sodasPurchased += 1;
-
-            cout << "STUDENT " << id << " NUM OF SODAS PURCHASED INCREASED TO " << sodasPurchased << endl;
         }
         _Catch(VendingMachine::Free &)
         {
@@ -146,14 +146,13 @@ void Student::main()
         }
         _Catch(WATCardOffice::Lost &)
         {
-            cout << "STUDENT " << id << " GOT FREE BOTTLE" << endl;
+            cout << "STUDENT " << id << " COURIER LOST WATCARD" << endl;
 
             printer.print(Printer::Student, id, 'L');
 
             cout << "STUDENT " << id << " BEFORE GETTING NEW WATCARD" << endl;
 
-            if (watCard != nullptr)
-                fwc = cardOffice.create(id, 5);
+            fwc = cardOffice.create(id, 5);
 
             cout << "STUDENT " << id << " AFTER GETTING NEW WATCARD" << endl;
 

@@ -7,11 +7,13 @@
 #include <uCobegin.h>
 #include <uPRNG.h>
 
+#include <iostream>
+
 WATCardOffice::WATCardOffice(Printer &prt, Bank &bank, unsigned int numCouriers)
     : printer(prt), bank(bank), numCouriers(numCouriers), closePool(0) {}
 
 WATCardOffice::Courier::Courier(Printer &printer, WATCardOffice &office, unsigned int id)
-    : printer(printer), office(office), id(id) {};
+    : printer(printer), office(office), id(id){};
 
 void WATCardOffice::Courier::main()
 {
@@ -32,7 +34,7 @@ void WATCardOffice::Courier::main()
            until enough funds in students account to withdraw */
         office.bank.withdraw(job->args.sid, job->args.amount);
 
-        if (prng(6) == 0) // check if WATCard is lost (1/6 chance)
+        if (prng(5) == 0) // check if WATCard is lost (1/6 chance)
         {
             printer.print(Printer::Courier, id, 'L', job->args.sid);
 
@@ -59,11 +61,19 @@ void WATCardOffice::Courier::main()
 /* called by student to create a new WATCard return a future WATCard */
 WATCard::FWATCard WATCardOffice::create(unsigned int sid, unsigned int amount)
 {
+    cout << "STUDENT " << sid << " IN HERE!!! BEFORE CREATING WATCARD" << endl;
+
     /* create a 'real' WATCard with an inital balance
        put onthe heap so it persists after the return */
     WATCard *card = new WATCard();
 
+    cout << "STUDENT " << sid << " IN HERE!!! AFTER CREATING WATCARD" << endl;
+
+    cout << "STUDENT " << sid << " IN HERE!!! BEFORE PUSHING WATCARD TO DELIVERED" << endl;
+
     deliveredWATCards.push_back(card);
+
+    cout << "STUDENT " << sid << " IN HERE!!! AFTER PUSHING JOB" << endl;
 
     WATCard::FWATCard fwc;
 

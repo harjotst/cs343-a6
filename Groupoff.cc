@@ -51,7 +51,7 @@ void Groupoff::main()
 }
 
 Groupoff::Groupoff(Printer &prt, unsigned int numStudents, unsigned int sodaCost, unsigned int groupoffDelay)
-    : printer(prt), numStudents(1), sodaCost(sodaCost), groupoffDelay(groupoffDelay) {}
+    : printer(prt), numStudents(numStudents), sodaCost(sodaCost), groupoffDelay(groupoffDelay) {}
 
 // called by all students
 WATCard::FWATCard Groupoff::giftCard()
