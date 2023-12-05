@@ -1,33 +1,22 @@
-#include "Printer.h"
-#include <uPRNG.h>
+#ifndef PARENT_H
+#define PARENT_H
 
+_Monitor Printer;
 
-_Task Parent {
-	Printer * prt;
-	Bank * bank;
-	unsigned int numStudents;
-	unsigned int parentalDelay;
+_Monitor Bank;
 
-		
-	void main() {
-		// distribute money to students until destructor is called
-		for(;;) {
-			// attempt the except of the Parent destructor without the acceptor blocking
-			// this causes parent to perform a yielding busy-wait on calls to its destructor
-			_Accept(~Parent) {
-				break;
+_Task Parent
+{
+	Printer & printer;
 
-			// if no call to destructor continue distributing money
-			} _Else {}
+	Bank & bank;
 
-			yield(parentalDelay);
-			unsigned int sid = prng(0, numStudents - 1); // prng(l, u) [l,u]
-			unsigned int amount = prng(1, 3);
+	unsigned int numStudents, parentalDelay;
 
-			bank->deposit(sid, amount);
-		}
-	}
+	void main();
 
-  public:
-	Parent( Printer & prt, Bank & bank, unsigned int numStudents, unsigned int parentalDelay ) : prt(&prt), bank(&bank), numStudents(numStudents), parentalDelay(parentalDelay) {}
+public:
+	Parent(Printer & prt, Bank & bank, unsigned int numStudents, unsigned int parentalDelay);
 };
+
+#endif // PARENT_H

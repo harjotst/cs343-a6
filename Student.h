@@ -1,6 +1,18 @@
 #ifndef STUDENT_H
 #define STUDENT_H
 
+#include <string>
+
+using namespace std;
+
+_Monitor Printer;
+
+_Task NameServer;
+
+_Task WATCardOffice;
+
+_Task Groupoff;
+
 _Task Student
 {
 private:
@@ -10,9 +22,11 @@ private:
 
     WATCardOffice & cardOffice;
 
-    Groupoff *groupoff;
+    Groupoff & groupoff;
 
     unsigned int id, maxPurchases;
+
+    string name;
 
     void main();
 

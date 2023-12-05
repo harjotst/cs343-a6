@@ -1,64 +1,74 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+
+#include "ConfigParams.h"
+#include "Printer.h"
+#include "VendingMachine.h"
+#include "NameServer.h"
+#include "Bank.h"
 #include "WATCardOffice.h"
 #include "Groupoff.h"
 #include "Parent.h"
-#include "Bank.h"
-#include <chrono>
-#include <thread>
+#include "Student.h"
 
 using namespace std;
 
-int main() {
-    unsigned int numStudents = 10;
-    unsigned int parentalDelay = 2;
-    unsigned int numCouriers = 5;
-    unsigned int sodaCost = 3;
-    unsigned int groupoffDelay = 2;
+string getFileAsStr(const char *fileName)
+{
+    ifstream file(fileName);
 
-    Printer printer = Printer();
-    Bank bank = Bank(numStudents);
-    Parent par = Parent(printer, bank, numStudents, parentalDelay);
-    WATCardOffice* office = new WATCardOffice(printer, bank, numCouriers);
-    //Groupoff* groupoff = new Groupoff(printer, numStudents, sodaCost, groupoffDelay);
-
-    WATCard::FWATCard fwc;
-    for(int id = 0; id < numStudents; id++) {
-        //cout << "call giftcard from main" << endl; // no gift card signals tilI run all at same time
-        //WATCard::FWATCard fgc = groupoff->giftCard();
-        // Creates a WAT card from WATCard office with balance of $5
-        cout << "create fwc" << endl;
-		fwc = office->create(id, 5);
-		cout << "returned fwat card" << endl;
-        WATCard *card;
-        bool lost = false;
-
-		//do { // dont handle lost watcards yet "/"
-        try {
-            //_Select(fgc)
-            //{
-            //    card = fgc();
-            //    fgc.reset();
-            //}
-            _Select(fwc)
-            {
-                
-                card = fwc();            
-            }    
-        }
-        _Catch(WATCardOffice::Lost &e)
-        {
-            cout << "student " << id << "lost watcard" << endl;
-            lost = true;
-            fwc = office->create(id, 5);
-            card = fwc();
-            //delete card;            
-
-        }
-		//} while(lost)
-
-        cout << "student " << id << " WATCard created" << endl;
-
-        //delete card;
+    if (!file.is_open())
+    {
+        cerr << "Failed to open file\n";
     }
 
-    delete office;
+    stringstream buffer;
+
+    buffer << file.rdbuf();
+
+    string contents = buffer.str();
+
+    file.close();
+
+    return contents;
+}
+
+int main(int argc, char **argv)
+{
+    ConfigParms config;
+
+    string fileContent = getFileAsStr(argv[1]);
+
+    processConfigFile(fileContent.c_str(), config);
+
+    cout << config << endl << endl;
+
+    Printer printer(config.numStudents, config.numVendingMachines, config.numCouriers);
+
+    NameServer nameServer(printer, config.numVendingMachines, config.numStudents);
+
+    BottlingPlant bottlingPlant(printer, nameServer, config.numVendingMachines, config.maxShippedPerFlavour, config.maxStockPerFlavour, config.timeBetweenShipments);
+
+    Bank bank(config.numStudents);
+
+    Parent parent(printer, bank, config.numStudents, config.parentalDelay);
+
+    WATCardOffice office(printer, bank, config.numCouriers);
+
+    Groupoff groupoff(printer, config.numStudents, config.sodaCost, config.groupoffDelay);
+
+    VendingMachine **vendingMachines = new VendingMachine *[config.numVendingMachines];
+
+    for (unsigned int id = 0; id < config.numVendingMachines; id += 1)
+        vendingMachines[id] = new VendingMachine(printer, nameServer, id, config.sodaCost);
+
+    Student **students = new Student *[config.numStudents];
+
+    for (unsigned int id = 0; id < config.numStudents; id += 1)
+        students[id] = new Student(printer, nameServer, office, groupoff, id, config.maxPurchases);
+
+    for (unsigned int id = 0; id < config.numStudents; id += 1)
+        delete students[id];
 }

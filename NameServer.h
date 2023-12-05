@@ -1,8 +1,9 @@
 #ifndef NAME_SERVER_H
 #define NAME_SERVER_H
 
-#include "printer.h"
-#include "vendingMachine.h"
+_Monitor Printer;
+
+_Task VendingMachine;
 
 _Task NameServer
 {
@@ -21,6 +22,8 @@ private:
 
 public:
     NameServer(Printer & prt, unsigned int numVendingMachines, unsigned int numStudents); // done
+
+    ~NameServer();
 
     /* Register a vending machine in the next available spot in the list of vending machines */
     void VMregister(VendingMachine *vendingmachine); // done

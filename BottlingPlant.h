@@ -1,8 +1,11 @@
 #ifndef BOTTLING_PLANT_H
 #define BOTTLING_PLANT_H
 
-#include "printer.h"
-#include "nameServer.h"
+#include "Truck.h"
+
+_Monitor Printer;
+
+_Task NameServer;
 
 _Task BottlingPlant
 {
@@ -11,10 +14,9 @@ private:
 
     NameServer & nameServer;
 
-    unsigned int numVendingMachines, maxShippedPerFlavour, maxStockPerFlavour,
-        timeBetweenShipments;
+    Truck truck;
 
-    Truck &truck;
+    unsigned int numVendingMachines, maxShippedPerFlavour, maxStockPerFlavour, timeBetweenShipments;
 
     bool isShuttingDown;
 
@@ -38,6 +40,8 @@ public:
     BottlingPlant(Printer & prt, NameServer & nameServer, unsigned int numVendingMachines,
                   unsigned int maxShippedPerFlavour, unsigned int maxStockPerFlavour,
                   unsigned int timeBetweenShipments); // done
+
+    ~BottlingPlant();
 
     /* Called by truck to get bottle cargo that needs to be distributed to vending machines */
     void getShipment(unsigned int cargo[]); // done

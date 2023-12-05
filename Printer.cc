@@ -1,7 +1,13 @@
-#include "printer.h"
+#include "Printer.h"
+
+#include <iostream>
+#include <string>
+#include <cmath>
+
+using namespace std;
 
 Printer::Printer(unsigned int numStudents, unsigned int numVendingMachines, unsigned int numCouriers)
-    : numOfStudents(numStudent), numOfVendingMachines(numVendingMachines), numOfCouriers(numCouriers)
+    : numOfStudents(numStudents), numOfVendingMachines(numVendingMachines), numOfCouriers(numCouriers)
 {
     unsigned int buffSize = 6 + numOfStudents + numOfVendingMachines + numOfCouriers;
 
@@ -9,9 +15,33 @@ Printer::Printer(unsigned int numStudents, unsigned int numVendingMachines, unsi
 
     for (unsigned int idx = 0; idx < buffSize; idx += 1)
         printerBuffer[idx] = nullptr;
+
+    // Printer Header
+    cout << "Parent  Gropoff WATOff  Names   Truck   Plant   ";
+
+    for (unsigned int idx = 0; idx < numOfStudents; idx += 1)
+        cout << "Stud" << idx << string(4 - (idx > 0 ? floor(log10(idx) + 1) : 1), ' ');
+
+    for (unsigned int idx = 0; idx < numOfVendingMachines; idx += 1)
+        cout << "Mach" << idx << string(4 - (idx > 0 ? floor(log10(idx) + 1) : 1), ' ');
+
+    for (unsigned int idx = 0; idx < numOfCouriers; idx += 1)
+        cout << "Cour" << idx << string(4 - (idx > 0 ? floor(log10(idx) + 1) : 1), ' ');
+
+    cout << endl;
+
+    for (unsigned int idx = 0; idx < buffSize; idx += 1)
+        cout << "******* ";
+
+    cout << endl;
 }
 
-Printer::PrinterState::PrinterState(Kind kind, char state, unsigned int value1 = 0, unsigned int value2 = 0, unsigned int lid = 0)
+Printer::~Printer()
+{
+    cout << string(23, '*') << endl;
+}
+
+Printer::PrinterState::PrinterState(Kind kind, char state, unsigned int value1, unsigned int value2, unsigned int lid)
     : kind(kind), state(state), value1(value1), value2(value2), lid(lid) {}
 
 void Printer::handleParentOutput(PrinterState *ps)
@@ -78,7 +108,7 @@ void Printer::handleStudentOutput(PrinterState *ps)
 
 void Printer::handleVendingOutput(PrinterState *ps)
 {
-    if (ps->state == 'r' || ps->state == 'B' || ps->state == 'A' || ps->state == 'F')
+    if (ps->state == 'r' || ps->state == 'R' || ps->state == 'A' || ps->state == 'F')
         printState(ps);
     else if (ps->state == 'S')
         printStateSingle(ps);
@@ -99,7 +129,7 @@ void Printer::handleCourierOutput(PrinterState *ps)
 void Printer::handleOutput(PrinterState *ps)
 {
     if (ps == nullptr)
-        cout << "\t";
+        cout << "        ";
     else if (ps->kind == Parent)
         handleParentOutput(ps);
     else if (ps->kind == Groupoff)
@@ -122,10 +152,10 @@ void Printer::handleOutput(PrinterState *ps)
 
 unsigned int Printer::getOffset(Kind kind, unsigned int lid)
 {
-    return kind == Student   ? Student + lid
-           : kind == Vending ? Student + numOfStudents + lid
-           : kind == Courier ? Student + numOfStudents + numOfVendingMachines + lid
-                             : kind;
+    return kind == Student   ? (unsigned int)(Student + lid)
+           : kind == Vending ? (unsigned int)(Student + numOfStudents + lid)
+           : kind == Courier ? (unsigned int)(Student + numOfStudents + numOfVendingMachines + lid)
+                             : (unsigned int)kind;
 }
 
 void Printer::flush(Kind kind, unsigned int lid)
@@ -136,7 +166,15 @@ void Printer::flush(Kind kind, unsigned int lid)
     unsigned int buffSize = 6 + numOfStudents + numOfVendingMachines + numOfCouriers;
 
     for (unsigned int idx = 0; idx < buffSize; idx += 1)
+    {
+        // cout << "INSIDE OF FLUSH METHOD" << endl;
+
         handleOutput(printerBuffer[idx]);
+
+        delete printerBuffer[idx];
+
+        printerBuffer[idx] = nullptr;
+    }
 
     cout << endl;
 }
@@ -164,6 +202,8 @@ void Printer::printStateDouble(PrinterState *ps)
 
 void Printer::print(Kind kind, char state)
 {
+    // cout << "PRINT 1" << endl;
+
     flush(kind);
 
     printerBuffer[getOffset(kind)] = new PrinterState(kind, state);
@@ -171,6 +211,8 @@ void Printer::print(Kind kind, char state)
 
 void Printer::print(Kind kind, char state, unsigned int value1)
 {
+    // cout << "PRINT 2" << endl;
+
     flush(kind);
 
     printerBuffer[getOffset(kind)] = new PrinterState(kind, state, value1);
@@ -178,6 +220,8 @@ void Printer::print(Kind kind, char state, unsigned int value1)
 
 void Printer::print(Kind kind, char state, unsigned int value1, unsigned int value2)
 {
+    // cout << "PRINT 3" << endl;
+
     flush(kind);
 
     printerBuffer[getOffset(kind)] = new PrinterState(kind, state, value1, value2);
@@ -185,6 +229,8 @@ void Printer::print(Kind kind, char state, unsigned int value1, unsigned int val
 
 void Printer::print(Kind kind, unsigned int lid, char state)
 {
+    // cout << "PRINT 4" << endl;
+
     flush(kind, lid);
 
     printerBuffer[getOffset(kind, lid)] = new PrinterState(kind, state, 0, 0, lid);
@@ -192,6 +238,8 @@ void Printer::print(Kind kind, unsigned int lid, char state)
 
 void Printer::print(Kind kind, unsigned int lid, char state, unsigned int value1)
 {
+    // cout << "PRINT 5" << endl;
+
     flush(kind, lid);
 
     printerBuffer[getOffset(kind, lid)] = new PrinterState(kind, state, value1, 0, lid);
@@ -199,6 +247,8 @@ void Printer::print(Kind kind, unsigned int lid, char state, unsigned int value1
 
 void Printer::print(Kind kind, unsigned int lid, char state, unsigned int value1, unsigned int value2)
 {
+    // cout << "PRINT 6" << endl;
+
     flush(kind, lid);
 
     printerBuffer[getOffset(kind, lid)] = new PrinterState(kind, state, value1, value2, lid);

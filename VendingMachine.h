@@ -1,25 +1,30 @@
 #ifndef VENDING_MACHINE_H
 #define VENDING_MACHINE_H
 
-#include "printer.h"
-#include "nameServer.h"
-#include "bottlingPlant.h"
-#include "watcard.h"
+#include "BottlingPlant.h"
+
+#include <string>
+
+using namespace std;
+
+_Monitor Printer;
+
+_Task NameServer;
+
+class WATCard;
 
 _Task VendingMachine
 {
 private:
-    Printer &printer;
+    Printer & printer;
 
-    NameServer &nameServer;
-
-    WATCardOffice &cardOffice;
-
-    Groupoff &groupoff;
+    NameServer & nameServer;
 
     unsigned int id, sodaCost;
 
     unsigned int *inv;
+
+    string name;
 
     void main();
 
@@ -31,9 +36,9 @@ public:
     _Event Funds{};
 
     /* Exception thrown when flavour requested for purchase is out of stock */
-    _Event Stock{}; 
+    _Event Stock{};
 
-    VendingMachine(Printer &prt, NameServer &nameServer, unsigned int id, unsigned int sodaCost); // done
+    VendingMachine(Printer & prt, NameServer & nameServer, unsigned int id, unsigned int sodaCost); // done
 
     ~VendingMachine();
 
