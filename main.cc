@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <uPRNG.h>
 
 #include "ConfigParams.h"
 #include "Printer.h"
@@ -15,36 +16,73 @@
 
 using namespace std;
 
-string getFileAsStr(const char *fileName)
+string getFileAsStr(const char* configFileName)
 {
-    ifstream file(fileName);
+    try {
+        ifstream file(configFileName);
 
-    if (!file.is_open())
-    {
-        cerr << "Failed to open file\n";
+        stringstream buffer;
+
+        buffer << file.rdbuf();
+
+        string contents = buffer.str();
+
+        file.close();
+
+        return contents;
+        
+    } catch( uFile::Failure & ) {
+        cerr << "Error: Could not open input file \"" << configFileName << "\"" << endl;
+        exit( EXIT_FAILURE );
     }
-
-    stringstream buffer;
-
-    buffer << file.rdbuf();
-
-    string contents = buffer.str();
-
-    file.close();
-
-    return contents;
-}
+    }
 
 int main(int argc, char **argv)
 {
+    char* configFileName = "soda.config";
+    unsigned int processors = 1;
+
+    ifstream file;
+
+	struct cmd_error {};
+	
+	try {
+		switch ( argc ) {
+		  case 4:
+            if ( strcmp( argv[3], "d" ) != 0 ) {
+                processors = convert( argv[3] ); 
+                if ( processors <= 0 ) {
+                    throw cmd_error();
+                }
+            }
+          case 3:
+            if ( strcmp( argv[2], "d" ) != 0 ) {
+                unsigned int seed = convert( argv[2] ); 
+                if ( seed <= 0 ) {
+                    throw cmd_error();
+                } else {
+                    set_seed(seed);
+                }
+            }
+          case 2:
+            if ( strcmp( argv[1], "d" ) != 0 ) {
+                configFileName = argv[1];
+            }
+		}
+	} catch( ... ) {
+		cerr << "Usage: ./soda [ config-file | 'd' (default file soda.config) [ seed (> 0) | 'd' (default random) [ processors (> 0) | 'd' (default 1) ] ] ]" << endl;
+		exit( EXIT_FAILURE );
+	}
+
+    uProcessor p[processors - 1];
+
     ConfigParms config;
 
-    string fileContent = getFileAsStr(argv[1]);
+    string fileContent = getFileAsStr(configFileName);
 
     processConfigFile(fileContent.c_str(), config);
 
-    cout << config << endl
-         << endl;
+    cout << config << endl << endl;
 
     Printer *printer = new Printer(config.numStudents, config.numVendingMachines, config.numCouriers);
 
