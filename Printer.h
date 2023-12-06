@@ -56,16 +56,27 @@ private:
 
     PrinterState **printerBuffer;
 
+    /* Used to get offset index to "lid" of "kind" in printerBuffer. */
     unsigned int getOffset(Kind kind, unsigned int lid = 0);
 
+    /* Used to flush printer buffer's state if index getOffset(kind, lid)
+       in the printerBuffer array has a state in it already. */
     void flush(Kind kind, unsigned int lid = 0);
 
+    /* Used to call specifc handleOutput methods based on PrinterState
+       type. */
     void handleOutput(PrinterState * ps);
 
+    /* Used to print PrinterState with only state. */
     void printState(PrinterState * ps);
+
+    /* Used to print PrinterState with one value. */
     void printStateSingle(PrinterState * ps);
+
+    /* Used to print PrinterState with two values.  */
     void printStateDouble(PrinterState * ps);
 
+    /* Specific handleOutputs */
     void handleParentOutput(PrinterState * ps);
     void handleGroupoffOutput(PrinterState * ps);
     void handleWATCardOfficeOutput(PrinterState * ps);

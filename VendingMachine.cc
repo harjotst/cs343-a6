@@ -13,16 +13,12 @@ VendingMachine::VendingMachine(Printer &prt, NameServer &nameServer, unsigned in
 
     for (unsigned int idx = 0; idx < BottlingPlant::NUM_OF_FLAVOURS; idx += 1)
         inv[idx] = 0;
-
-    name = "Vending" + to_string(id);
-
-    setName(name.c_str());
 }
 
 VendingMachine::~VendingMachine()
 {
     delete inv;
-    
+
     printer.print(Printer::Vending, id, 'F');
 }
 

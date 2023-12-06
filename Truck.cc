@@ -41,15 +41,9 @@ void Truck::restock(unsigned int vid, unsigned int *inventory, unsigned int carg
 
 void Truck::main()
 {
-    // cout << "HERE!!!!" << endl;
-
     printer.print(Printer::Truck, 'S');
 
-    // cout << "AFTER HERE!!!! BEFORE CALLING MACHINE LIST " << &nameServer << endl;
-
     VendingMachine **vendingMachines = nameServer.getMachineList();
-
-    // cout << "AFTER CALLING GET MACHINE LIST!!!" << endl;
 
     int nextToRestock = 0;
 
@@ -57,29 +51,15 @@ void Truck::main()
     {
         for (;;)
         {
-            // cout << "BEFORE YIELD!!!!" << endl;
-
             yield(1 + prng(9));
 
             unsigned int cargo[4] = {0, 0, 0, 0};
 
-            // cout << "Cargo After Shipment: " << cargo[0] << " " << cargo[1] << " " << cargo[2] << " " << cargo[3] << endl;
-
-            // cout << "BEFORE GET SHIPMENT IN TRUCK" << endl;
-
             bottlingPlant.getShipment(cargo);
-
-            // cout << "AFTER GET SHIPMENT IN TRUCK" << endl;
-
-            // cout << "Cargo After Shipment: " << cargo[0] << " " << cargo[1] << " " << cargo[2] << " " << cargo[3] << endl;
 
             unsigned int numOfRemBottles = cargo[0] + cargo[1] + cargo[2] + cargo[3];
 
-            // cout << "NUM OF REM BOTTLES?: " << numOfRemBottles << endl;
-
             printer.print(Printer::Truck, 'P', numOfRemBottles);
-
-            // exit(1);
 
             int firstRestocked = nextToRestock;
 
@@ -87,8 +67,6 @@ void Truck::main()
             {
                 if (isCargoEmpty(cargo))
                     break;
-
-                // cout << "TRUCK IN HERE?" << endl;
 
                 VendingMachine *vendingMachine = vendingMachines[nextToRestock];
 
@@ -114,8 +92,6 @@ void Truck::main()
 
                 yield(10);
             }
-
-            // cout << "TRUCK IS DONE ANOTHER THINGY" << endl;
         }
     }
     _Catch(BottlingPlant::Shutdown &)

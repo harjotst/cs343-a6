@@ -14,16 +14,13 @@ Parent::~Parent()
 
 void Parent::main()
 {
-    // cout << "par 9" << endl;
     printer.print(Printer::Parent, 'S');
 
     int counter = 0;
 
-    // distribute money to students until destructor is called
     for (;;)
     {
-        // attempt the except of the Parent destructor without the acceptor blocking
-        // this causes parent to perform a yielding busy-wait on calls to its destructor
+        /* Distribute money to random student until destrutor is called. */
         _Accept(~Parent)
         {
             break;
@@ -32,7 +29,7 @@ void Parent::main()
         {
             yield(parentalDelay);
 
-            unsigned int sid = prng(0, numStudents - 1); // prng(l, u) [l,u]
+            unsigned int sid = prng(0, numStudents - 1);
 
             unsigned int amount = prng(1, 3);
 

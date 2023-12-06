@@ -24,8 +24,6 @@ private:
 
     unsigned int *inv;
 
-    string name;
-
     void main();
 
 public:

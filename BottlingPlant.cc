@@ -8,19 +8,12 @@ using namespace std;
 BottlingPlant::BottlingPlant(Printer &prt, NameServer &nameServer, unsigned int numVendingMachines,
                              unsigned int maxShippedPerFlavour, unsigned int maxStockPerFlavour,
                              unsigned int timeBetweenShipments)
-    : printer(prt),
-      nameServer(nameServer),
-      truck(prt, nameServer, *this, numVendingMachines, maxStockPerFlavour),
-      numVendingMachines(numVendingMachines),
-      maxShippedPerFlavour(maxShippedPerFlavour),
-      maxStockPerFlavour(maxStockPerFlavour),
-      timeBetweenShipments(timeBetweenShipments),
-      isShuttingDown(false) {}
+    : printer(prt), nameServer(nameServer), truck(prt, nameServer, *this, numVendingMachines, maxStockPerFlavour),
+      numVendingMachines(numVendingMachines), maxShippedPerFlavour(maxShippedPerFlavour),
+      maxStockPerFlavour(maxStockPerFlavour), timeBetweenShipments(timeBetweenShipments), isShuttingDown(false) {}
 
 BottlingPlant::~BottlingPlant()
 {
-    // cout << "IN CALL TO DESTRUCTOR IN BOTTLING PLANT" << endl;
-
     printer.print(Printer::BottlingPlant, 'F');
 }
 
@@ -33,36 +26,37 @@ void BottlingPlant::main()
         yield(timeBetweenShipments);
 
         for (unsigned int idx = 0; idx < NUM_OF_FLAVOURS; idx += 1)
+        {
             productionRun[idx] = prng(maxShippedPerFlavour);
+        }
 
         unsigned int bottlesInProdRun = productionRun[0] + productionRun[1] + productionRun[2] + productionRun[3];
 
         printer.print(Printer::BottlingPlant, 'G', bottlesInProdRun);
         
-        // cout << "BEFORE CALLS TO ACCEPTS IN BOTTLING PLANT" << endl;
         _Accept(~BottlingPlant)
         {
-            // cout << "AFTER CALL TO GET DESTRUCTOR IN BOTTLING PLANT" << endl;
-
+            /* Time to shutdown. Notify Truck. */
             isShuttingDown = true;
 
+            /* Wait for/accept a call to getShipment so the Truck can
+               catch the Shutdown exception. */
             _Accept(getShipment);
 
             break;
         }
-        or _Accept(getShipment)
-        {
-            // cout << "AFTER CALL TO GET SHIPMENT IN BOTTLING PLANT" << endl;
-        }
+        or _Accept(getShipment);
     }
 }
 
 void BottlingPlant::getShipment(unsigned int cargo[])
 {
-    // cout << "IN CALL TO GET SHIPMENT IN BOTTLING PLANT" << endl;
-
     if (isShuttingDown)
     {
+        /* Used to stop BottlingPlant from throwing RendezvousFailure
+           as Rendezvous doesn't complete from the perspective of the
+           BottlingPlant. Found usage of this method in uC++ Reference
+           Manual page 101. */
         uRendezvousAcceptor();
 
         _Throw Shutdown();

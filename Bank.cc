@@ -2,38 +2,36 @@
 
 Bank::Bank(unsigned int numStudents)
 {
-    student_accounts = new unsigned int[numStudents];
+    studentAccountBalances = new unsigned int[numStudents];
 
-    account_locks = new uCondition[numStudents];
+    studentAccountLocks = new uCondition[numStudents];
 
-    for (unsigned int i = 0; i < numStudents; i++)
+    for (unsigned int id = 0; id < numStudents; id += 1)
     {
-        student_accounts[i] = 0;
+        studentAccountBalances[id] = 0;
     }
 }
 
-// destructor called by main at the end of execution
 Bank::~Bank()
 {
-    delete[] student_accounts;
-    delete[] account_locks;
+    delete[] studentAccountBalances;
+
+    delete[] studentAccountLocks;
 }
 
 void Bank::deposit(unsigned int id, unsigned int amount)
 {
-    student_accounts[id] += amount;
-    account_locks[id].signal();
+    studentAccountBalances[id] += amount;
+
+    studentAccountLocks[id].signal();
 }
 
 void Bank::withdraw(unsigned int id, unsigned int amount)
 {
-    // if the students account doesn't have enough money to withdraw amount, wait until it does
-    // this can take more than one deposit
-    while (student_accounts[id] < amount)
+    while (studentAccountBalances[id] < amount)
     {
-        // wait on that specific deposit into this students account
-        account_locks[id].wait();
+        studentAccountLocks[id].wait();
     }
 
-    student_accounts[id] -= amount;
+    studentAccountBalances[id] -= amount;
 }

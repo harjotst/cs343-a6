@@ -26,8 +26,6 @@ private:
 
     unsigned int id, maxPurchases;
 
-    string name;
-
     void main();
 
 public:
