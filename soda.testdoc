@@ -1,0 +1,39 @@
+The first few tests will focus on user interface testing to make sure the command line arguments and input file is handled correctly.
+In the first test run "./soda" without any input file specified to test that it runs with the default parameters, and it does as expected.
+Next test "./soda file_not_present" on a name of a file that is not present at that path and check that and "Error: Could not open input file 
+"file_not_present"" as the error message, the error message of running the provided solution executable with the same command. And out output matched.
+We also tested passing the wrong type of parameters, ie. "./soda file_present hi" with string "hi" instead of a number for seed. As expected 
+we got the error message "Usage: ./soda [ config-file | 'd' (default file soda.config) [ seed (> 0) | 'd' (default random) [ processors (> 0) | 
+'d' (default 1) ] ] ]".
+
+The next tests are the second layer, algorithmic tests. 
+
+In this test we compare setting groupOffDelay to 0 versus 50 to ensure the gift cards are being delivered as expected. First we expect the future
+gift cards to be delivered at the beginning of the program depicted with printers GroupOff column printing D, we expect this in both cases since
+the future gift cards are delivered before any purchases. Then in the case with a delay of 0 we expect the first purchases to be with the giftcards,
+and only one per student since then the giftcard can only be used once. Then for the case of a delay of 50 we expect a much longer delay before using the 
+giftcard rather than the WATCard. This is exactly what we observe, when setting groupOffDelay to 0, each student's first purchase is printed as G (by GiftCard),
+and all following purchases are with B (by WATCard). However, for  groupOffDelay=50 the soda is more often bought with the WATCard, printed as B, for the first
+few purchases as expected, then a later purchase is with the GiftCard.
+
+This next test is just to demonstrate correctness of termination to ensure no task is getting stuck waiting on cooperation. In this test we run the program with
+a large number of students (100) and couriers (20), in order to require cooperation between a lot of tasks quickly. With this test we check that the printer
+outputs F at the end of each objects column. In this test there are 129 columns of the printer printing out different objects states, and we check that there are
+129 prints to the state T to denote that all terminate. With this test we also confirm there are no memory freeing issues warned about after execution. 
+
+
+This next test is to confirm the sodas are being priced as expected, we compare a low soda cost of $1 to a high soda cost of $1000 and expect the
+execution to take longer, as the parental deposits of $1-3 are quite small in comparison to the $1000 costs. When running with soda priced at $1,
+the output only has 102 lines and rounds to 0.00s to run, however, when running with the soda priced at $10000 it prints 33286 lines and take 0.26s
+user time to run. These trends are what we expected to see since the students are taking longer and parents are printing more deposit statements
+while waiting for enough money to purchase expensive soda.
+
+This next test covers the case where there a lot of purchases but not much production in the bottling plant and storage of bottles in the vending machine,
+so the students are having to wait until there is sufficient stock. We set MaxPurchases to 50, MaxStockPerFlavour to 2, and MaxShippedPerFlavour to 2 to handle this case. 
+We look at the printer output to see that there are many repeated selected vending machines prints (V state)
+for the students before they purchase a bottle with a WATCard or GiftCard. This depicts that they have to check many un stocked vending machine to get their soda. We got These
+expected results when we ran this test.
+
+Our last test covers the parentalDelay parameter, we compare a small parental delay of 1 to a large parental delay of 1000, and expect to see the program take much longer
+to execute with a large parental delay, because the student will spend more with insufficient funds, waiting for deposit from their parents. This is what we observe, on the run with a parental delay of 1, the program takes a user time rounded to 0s, versus with the parental delay
+of 1000 runs in 0.2s. And in one final test with parental delay of 100,000, this takes 1.47s to run.
