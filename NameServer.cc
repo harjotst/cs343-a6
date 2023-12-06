@@ -2,12 +2,9 @@
 #include "Printer.h"
 #include "VendingMachine.h"
 
-#include <iostream>
-
 using namespace std;
 
-NameServer::NameServer(Printer &prt, unsigned int numVendingMachines,
-                       unsigned int numStudents)
+NameServer::NameServer(Printer &prt, unsigned int numVendingMachines, unsigned int numStudents)
     : printer(prt), numOfVendingMachines(numVendingMachines), numOfStudents(numStudents)
 {
     vendingMachines = new VendingMachine *[numOfVendingMachines];
@@ -31,7 +28,6 @@ NameServer::~NameServer()
 
 void NameServer::main()
 {
-    // cout << "ns 33" << endl;
     printer.print(Printer::NameServer, 'S');
 
     for (;;)
@@ -59,6 +55,7 @@ VendingMachine *NameServer::getMachine(unsigned int id)
 
     printer.print(Printer::NameServer, 'N', id, vendingMachine->getId());
 
+    /* Set next VendingMachine for this Student. */
     nextVendingMachineForStudent[id] = (nextVendingMachineForStudent[id] + 1) % numOfVendingMachines;
 
     return vendingMachine;

@@ -34,21 +34,23 @@ struct ConfigParms
            << "GroupoffDelay: " << cp.groupoffDelay << '\n'
            << "ParentalDelay: " << cp.parentalDelay << '\n'
            << "NumCouriers: " << cp.numCouriers;
-        
+
         return os;
     }
 };
 
-// Helper function to skip whitespace characters.
+/* Helper function to skip whitespace characters. */
 const char *skipWhitespace(const char *current)
 {
     while (isspace((unsigned char)*current))
-        ++current;
+    {
+        current += 1;
+    }
 
     return current;
 }
 
-// Helper function to read an unsigned integer from the string.
+/* Helper function to read an unsigned integer from the string. */
 const char *readUnsignedInt(const char *str, unsigned int &outValue)
 {
     outValue = strtoul(str, const_cast<char **>(&str), 10);
@@ -58,37 +60,42 @@ const char *readUnsignedInt(const char *str, unsigned int &outValue)
 
 void processConfigFile(const char *configFile, ConfigParms &cparms)
 {
-    // Pointer to current character in config file
+    /* Pointer to current character in config file. */
     const char *current = configFile;
 
-    // Continue until the end of the string
+    /* Continue until the end of the string. */
     while (*current != '\0')
     {
-        // Skip whitespace before the key
+        /* Skip whitespace before the key. */
         current = skipWhitespace(current);
 
-        // Check if we're at the end of the string or a comment
+        /* Check if we're at the end of the string or a comment. */
         if (*current == '\0' || *current == '#')
         {
             while (*current != '\0' && *current != '\n')
-                ++current; // Skip to the end of the line
+            {
+                current += 1; /* Skip to the end of the line */
+            }
 
             continue;
         }
 
-        // Get the key by reading until the next whitespace or '='
+        /* Get the key by reading until the next whitespace */
         const char *keyStart = current;
 
         while (*current != '\0' && !isspace((unsigned char)*current))
-            ++current;
+        {
+            current += 1;
+        }
 
         string key(keyStart, current);
 
         // Skip whitespace before the value
         current = skipWhitespace(current);
 
-        // Read the value
         unsigned int value;
+
+        // Read the value
         current = readUnsignedInt(current, value);
 
         // Assign the value to the correct field in the config structure
@@ -115,7 +122,9 @@ void processConfigFile(const char *configFile, ConfigParms &cparms)
 
         // Skip to the end of the line after processing a value
         while (*current != '\0' && *current != '\n')
-            ++current;
+        {
+            current += 1;
+        }
     }
 }
 

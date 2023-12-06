@@ -18,8 +18,10 @@ private:
 
     unsigned int numOfVendingMachines, maxStockPerFlavour;
 
+    /* Checks if cargo is empty. */
     bool isCargoEmpty(unsigned int cargo[4]);
 
+    /* Restocks inventory with cargo.  */
     void restock(unsigned int vid, unsigned int *inventory, unsigned int cargo[4]);
 
     void main();

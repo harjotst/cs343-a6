@@ -18,13 +18,23 @@ private:
 
     unsigned int numVendingMachines, maxShippedPerFlavour, maxStockPerFlavour, timeBetweenShipments;
 
+    /* Flag used to "signal" Truck when it's time to shutdown. */
     bool isShuttingDown;
 
+    /* Used to hold number of bottles of each flavour after
+       production run has completed. */
     unsigned int productionRun[4];
 
     void main();
 
 public:
+    BottlingPlant(Printer & prt, NameServer & nameServer, unsigned int numVendingMachines,
+                  unsigned int maxShippedPerFlavour, unsigned int maxStockPerFlavour,
+                  unsigned int timeBetweenShipments);
+
+    ~BottlingPlant();
+
+    /* The different flavours of Cola and the number of total flavours. */
     enum Flavours
     {
         BLUES_BLACK_CHERRY, // 0
@@ -34,17 +44,13 @@ public:
         NUM_OF_FLAVOURS     // 4
     };
 
-    /* Exception thrown when bottling plant shuts down. Main purpose is to tell Truck to shutdown */
+    /* Exception thrown at Truck when bottling plant shuts down so Truck
+       may shutdown as well. */
     _Event Shutdown{};
 
-    BottlingPlant(Printer & prt, NameServer & nameServer, unsigned int numVendingMachines,
-                  unsigned int maxShippedPerFlavour, unsigned int maxStockPerFlavour,
-                  unsigned int timeBetweenShipments); // done
-
-    ~BottlingPlant();
-
-    /* Called by truck to get bottle cargo that needs to be distributed to vending machines */
-    void getShipment(unsigned int cargo[]); // done
+    /* Called by truck after production run to get cola cargo that needs 
+       to be distributed to vending machines. */
+    void getShipment(unsigned int cargo[]);
 };
 
 #endif // BOTTLING_PLANT_H

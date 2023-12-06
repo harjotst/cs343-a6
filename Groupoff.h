@@ -1,6 +1,8 @@
 #ifndef GROUPOFF_H
 #define GROUPOFF_H
 
+#include <vector>
+
 #include "WATCard.h"
 
 _Monitor Printer;
@@ -13,7 +15,8 @@ _Task Groupoff
 
 	unsigned int numStudents, sodaCost, groupoffDelay;
 
-	vector<WATCard::FWATCard> FWATCards;
+	vector<WATCard::FWATCard> fWATCards;
+
 	vector<WATCard *> deliveredWATCards;
 
 	void main();
