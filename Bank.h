@@ -6,7 +6,9 @@ _Monitor Bank
 private:
 	/* array for keeping track of account balances of each student. */
 	unsigned int *studentAccountBalances;
-	
+
+	int *withdrawAmountRequests;
+
 	/* condition locks for students to wait on in the event that
 	   there are insufficient funds in their account and to be woken
 	   up from once there are sufficient funds. */
